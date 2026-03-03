@@ -69,7 +69,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && !empty($_POST["message"])) {
 </head>
 <body>
 
-<h1>One-Sentence Chatbot</h1>
+<h1>CHATBOT - MICHAELBRANCH</h1>
 
 <form method="POST">
     <input type="text" name="message" placeholder="Ask something..." required>
