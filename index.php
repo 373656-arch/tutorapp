@@ -1,3 +1,25 @@
+<?php
+session_start();
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit;
+}
+
+require_once 'db.php';
+
+$user = null;
+try {
+    $stmt = $pdo->prepare("SELECT * FROM users WHERE id = ?");
+    $stmt->execute([$_SESSION['user_id']]);
+    $user = $stmt->fetch();
+    if (!$user) {
+        throw new Exception("User not found");
+    }
+} catch (Exception $e) {
+    error_log("Error fetching user: " . $e->getMessage());
+    $user = ['username' => 'Guest'];
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -28,7 +50,7 @@
     <header>
         <div style="font-size: 1.5rem; font-weight: bold;">hightutor.ai</div>
         <div style="display: flex; align-items: center; gap: 1rem;">
-            <span>Hi, <?= htmlspecialchars($user['username']) ?></span>
+            <span>Hi, <?= htmlspecialchars($user['username'] ?? 'Guest') ?></span>
             <a href="logout.php" class="logout-btn">Logout</a>
         </div>
     </header>
@@ -66,7 +88,7 @@
         }
 
         async function sendMessage() {
-            console.log("Send button clicked"); // Debug log
+            console.log("Send button clicked");
             const message = userInput.value.trim();
             const mode = modeSelect.value;
             if (!message) return;
@@ -77,7 +99,7 @@
             appendMessage('user', message);
 
             try {
-                console.log("Sending:", { message, mode }); // Debug log
+                console.log("Sending:", { message, mode });
                 const response = await fetch('api.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -85,14 +107,14 @@
                 });
                 
                 const data = await response.json();
-                console.log("API Response:", data); // Debug log
+                console.log("API Response:", data);
                 if (data.choices && data.choices[0].message) {
                     appendMessage('bot', data.choices[0].message.content);
                 } else {
                     appendMessage('bot', 'Error: ' + (data.error || 'Unknown error'));
                 }
             } catch (e) {
-                console.error("Fetch error:", e); // Debug log
+                console.error("Fetch error:", e);
                 appendMessage('bot', 'Error connecting to the tutor.');
             } finally {
                 userInput.disabled = false;
