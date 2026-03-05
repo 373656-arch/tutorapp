@@ -1,16 +1,3 @@
-<?php
-session_start();
-if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php");
-    exit;
-}
-
-require_once 'db.php';
-
-$stmt = $pdo->prepare("SELECT * FROM users WHERE id = ?");
-$stmt->execute([$_SESSION['user_id']]);
-$user = $stmt->fetch();
-?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -79,6 +66,7 @@ $user = $stmt->fetch();
         }
 
         async function sendMessage() {
+            console.log("Send button clicked"); // Debug log
             const message = userInput.value.trim();
             const mode = modeSelect.value;
             if (!message) return;
@@ -89,19 +77,22 @@ $user = $stmt->fetch();
             appendMessage('user', message);
 
             try {
+                console.log("Sending:", { message, mode }); // Debug log
                 const response = await fetch('api.php', {
                     method: 'POST',
-                    headers: { 'Content-Type: application/json' },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ message, mode })
                 });
                 
                 const data = await response.json();
+                console.log("API Response:", data); // Debug log
                 if (data.choices && data.choices[0].message) {
                     appendMessage('bot', data.choices[0].message.content);
                 } else {
                     appendMessage('bot', 'Error: ' + (data.error || 'Unknown error'));
                 }
             } catch (e) {
+                console.error("Fetch error:", e); // Debug log
                 appendMessage('bot', 'Error connecting to the tutor.');
             } finally {
                 userInput.disabled = false;
