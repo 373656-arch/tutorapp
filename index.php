@@ -44,6 +44,17 @@ try {
         button:hover { opacity: 0.9; }
         button:disabled { background: #ccc; }
         .logout-btn { background: #dc3545; font-size: 0.9rem; padding: 0.5rem 1rem; text-decoration: none; color: white; border-radius: 4px; }
+        
+        /* Flashcard Styles */
+        .flashcard-container { display: none; flex: 1; overflow-y: auto; padding: 2rem; max-width: 900px; margin: 0 auto; width: 100%; box-sizing: border-box; }
+        .flashcard { perspective: 1000px; width: 100%; height: 300px; position: relative; }
+        .flashcard-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.6s; transform-style: preserve-3d; box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2); }
+        .flashcard.flipped .flashcard-inner { transform: rotateY(180deg); }
+        .flashcard-front, .flashcard-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; display: flex; align-items: center; justify-content: center; border-radius: 8px; padding: 1rem; box-sizing: border-box; }
+        .flashcard-front { background: white; border: 1px solid #ddd; color: black; }
+        .flashcard-back { background: var(--primary); color: white; transform: rotateY(180deg); }
+        .flashcard-buttons { display: flex; justify-content: center; gap: 1rem; margin-top: 1rem; }
+        .flashcard-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; }
     </style>
 </head>
 <body>
@@ -61,6 +72,23 @@ try {
         </div>
     </div>
 
+    <div class="flashcard-container" id="flashcardContainer">
+        <div class="flashcard" id="flashcard">
+            <div class="flashcard-inner">
+                <div class="flashcard-front" id="flashcardFront">Front of the card</div>
+                <div class="flashcard-back" id="flashcardBack">Back of the card</div>
+            </div>
+        </div>
+        <div class="flashcard-buttons">
+            <button id="flipBtn">Flip Card</button>
+        </div>
+        <div class="flashcard-nav">
+            <button id="prevBtn">Previous</button>
+            <span id="cardCounter">1/1</span>
+            <button id="nextBtn">Next</button>
+        </div>
+    </div>
+
     <div class="controls">
         <select id="mode">
             <option value="general">General (Socratic)</option>
@@ -75,9 +103,23 @@ try {
 
     <script>
         const chat = document.getElementById('chat');
+        const flashcardContainer = document.getElementById('flashcardContainer');
         const modeSelect = document.getElementById('mode');
         const userInput = document.getElementById('userInput');
         const sendBtn = document.getElementById('sendBtn');
+
+        // Flashcard elements
+        const flashcard = document.getElementById('flashcard');
+        const flashcardFront = document.getElementById('flashcardFront');
+        const flashcardBack = document.getElementById('flashcardBack');
+        const flipBtn = document.getElementById('flipBtn');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const cardCounter = document.getElementById('cardCounter');
+
+        let currentMode = 'general';
+        let flashcards = [];
+        let currentCardIndex = 0;
 
         function appendMessage(role, text) {
             const div = document.createElement('div');
@@ -86,6 +128,65 @@ try {
             chat.appendChild(div);
             chat.scrollTop = chat.scrollHeight;
         }
+
+        function showFlashcardMode() {
+            chat.style.display = 'none';
+            flashcardContainer.style.display = 'flex';
+            fetchFlashcards();
+        }
+
+        function showChatMode() {
+            chat.style.display = 'flex';
+            flashcardContainer.style.display = 'none';
+        }
+
+        async function fetchFlashcards() {
+            // Placeholder for fetching flashcards from the server
+            // For now, we'll use a local array as an example
+            flashcards = [
+                { front: 'What is the capital of France?', back: 'Paris' },
+                { front: 'What is 2 + 2?', back: '4' },
+                { front: 'What is the largest planet in our solar system?', back: 'Jupiter' }
+            ];
+            currentCardIndex = 0;
+            updateFlashcard();
+        }
+
+        function updateFlashcard() {
+            if (flashcards.length === 0) return;
+            flashcardFront.textContent = flashcards[currentCardIndex].front;
+            flashcardBack.textContent = flashcards[currentCardIndex].back;
+            cardCounter.textContent = `${currentCardIndex + 1}/${flashcards.length}`;
+        }
+
+        flipBtn.addEventListener('click', () => {
+            flashcard.classList.toggle('flipped');
+        });
+
+        prevBtn.addEventListener('click', () => {
+            if (currentCardIndex > 0) {
+                currentCardIndex--;
+                flashcard.classList.remove('flipped');
+                updateFlashcard();
+            }
+        });
+
+        nextBtn.addEventListener('click', () => {
+            if (currentCardIndex < flashcards.length - 1) {
+                currentCardIndex++;
+                flashcard.classList.remove('flipped');
+                updateFlashcard();
+            }
+        });
+
+        modeSelect.addEventListener('change', () => {
+            currentMode = modeSelect.value;
+            if (currentMode === 'flashcards') {
+                showFlashcardMode();
+            } else {
+                showChatMode();
+            }
+        });
 
         async function sendMessage() {
             console.log("Send button clicked");
