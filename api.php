@@ -10,9 +10,9 @@ require_once 'SystemPrompt.php';
 
 header('Content-Type: application/json');
 
-$apiKey = getenv('GROQLLM_API_KEY');
+$apiKey = $_ENV['GROQLLM_API_KEY'];
 if (!$apiKey) {
-    echo json_encode(['error' => 'API Key missing']);
+    echo json_encode(['error' => 'API Key missing in Replit Secrets']);
     exit;
 }
 
@@ -57,4 +57,3 @@ if ($httpCode === 200) {
 } else {
     echo json_encode(['error' => "API Error ($httpCode)", 'raw' => $response]);
 }
-?>
