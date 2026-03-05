@@ -57,3 +57,4 @@ if ($httpCode === 200) {
 } else {
     echo json_encode(['error' => "API Error ($httpCode)", 'raw' => $response]);
 }
+?>
