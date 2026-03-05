@@ -54,7 +54,7 @@ try {
         .flashcard-front { background: white; border: 1px solid #ddd; color: black; }
         .flashcard-back { background: var(--primary); color: white; transform: rotateY(180deg); }
         .flashcard-buttons { display: flex; justify-content: center; gap: 1rem; margin-top: 1rem; }
-        .flashcard-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; }
+        .flashcard-nav { display: flex; justify-content: center; gap: 1rem; margin-top: 1rem; }
     </style>
 </head>
 <body>
@@ -79,13 +79,13 @@ try {
                 <div class="flashcard-back" id="flashcardBack">Back of the card</div>
             </div>
         </div>
-        <div class="flashcard-buttons">
-            <button id="flipBtn">Flip Card</button>
-        </div>
         <div class="flashcard-nav">
             <button id="prevBtn">Previous</button>
-            <span id="cardCounter">1/1</span>
+            <button id="flipBtn">Flip Card</button>
             <button id="nextBtn">Next</button>
+        </div>
+        <div style="text-align: center; margin-top: 1rem;">
+            <span id="cardCounter">1/1</span>
         </div>
     </div>
 
@@ -140,12 +140,11 @@ try {
         }
 
         async function fetchFlashcards(topic) {
-            // Placeholder for fetching flashcards from the server
-            // For now, we'll use a local array as an example
+            // Simulate API call to generate flashcards based on topic
             flashcards = [
-                { front: 'What is the capital of France?', back: 'Paris' },
-                { front: 'What is 2 + 2?', back: '4' },
-                { front: 'What is the largest planet in our solar system?', back: 'Jupiter' }
+                { front: 'What was the main cause of the American Revolution?', back: 'Taxation without representation' },
+                { front: 'Who was the primary author of the Declaration of Independence?', back: 'Thomas Jefferson' },
+                { front: 'What document established the first government of the United States?', back: 'Articles of Confederation' }
             ];
             currentCardIndex = 0;
             updateFlashcard();
