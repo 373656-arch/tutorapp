@@ -132,7 +132,6 @@ try {
         function showFlashcardMode() {
             chat.style.display = 'none';
             flashcardContainer.style.display = 'flex';
-            fetchFlashcards();
         }
 
         function showChatMode() {
@@ -140,7 +139,7 @@ try {
             flashcardContainer.style.display = 'none';
         }
 
-        async function fetchFlashcards() {
+        async function fetchFlashcards(topic) {
             // Placeholder for fetching flashcards from the server
             // For now, we'll use a local array as an example
             flashcards = [
@@ -182,7 +181,7 @@ try {
         modeSelect.addEventListener('change', () => {
             currentMode = modeSelect.value;
             if (currentMode === 'flashcards') {
-                showFlashcardMode();
+                appendMessage('bot', 'Please enter the topic or subject you want flashcards for.');
             } else {
                 showChatMode();
             }
@@ -201,18 +200,26 @@ try {
 
             try {
                 console.log("Sending:", { message, mode });
-                const response = await fetch('api.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message, mode })
-                });
-                
-                const data = await response.json();
-                console.log("API Response:", data);
-                if (data.choices && data.choices[0].message) {
-                    appendMessage('bot', data.choices[0].message.content);
+                if (mode === 'flashcards') {
+                    // Simulate fetching flashcards based on user input
+                    appendMessage('bot', `Generating flashcards for: ${message}`);
+                    await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call delay
+                    fetchFlashcards(message);
+                    showFlashcardMode();
                 } else {
-                    appendMessage('bot', 'Error: ' + (data.error || 'Unknown error'));
+                    const response = await fetch('api.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ message, mode })
+                    });
+                    
+                    const data = await response.json();
+                    console.log("API Response:", data);
+                    if (data.choices && data.choices[0].message) {
+                        appendMessage('bot', data.choices[0].message.content);
+                    } else {
+                        appendMessage('bot', 'Error: ' + (data.error || 'Unknown error'));
+                    }
                 }
             } catch (e) {
                 console.error("Fetch error:", e);
