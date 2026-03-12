@@ -62,6 +62,7 @@ try {
         <div style="font-size: 1.5rem; font-weight: bold;">hightutor.ai</div>
         <div style="display: flex; align-items: center; gap: 1rem;">
             <span>Hi, <?= htmlspecialchars($user['username'] ?? 'Guest') ?></span>
+            <a href="profile.php" style="padding: 0.5rem 1rem; border-radius: 4px; background: #6c757d; color: white; text-decoration: none; font-size: 0.9rem;">Profile</a>
             <a href="logout.php" class="logout-btn">Logout</a>
         </div>
     </header>
