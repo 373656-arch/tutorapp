@@ -1,9 +1,8 @@
 <?php
-// Database configuration
-$host = 'auth-db941.hstgr.io';
-$db   = 'u237055794_team04';
-$user = 'u237055794_team04';
-$pass = 'K83wn/|=6?!u';
+$host    = getenv('DB_HOST') ?: 'auth-db941.hstgr.io';
+$db      = getenv('DB_NAME') ?: 'u237055794_team04';
+$user    = getenv('DB_USER') ?: 'u237055794_team04';
+$pass    = getenv('DB_PASS') ?: '';
 $charset = 'utf8mb4';
 
 $dsn = "mysql:host=$host;dbname=$db;charset=$charset";
@@ -14,8 +13,8 @@ $options = [
 ];
 
 try {
-     $pdo = new PDO($dsn, $user, $pass, $options);
+    $pdo = new PDO($dsn, $user, $pass, $options);
 } catch (\PDOException $e) {
-     throw new \PDOException($e->getMessage(), (int)$e->getCode());
+    throw new \PDOException($e->getMessage(), (int)$e->getCode());
 }
 ?>
