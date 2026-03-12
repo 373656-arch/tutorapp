@@ -208,7 +208,7 @@ $current_username = $user['username'] ?? '';
         </form>
         
         <div class="logout-link">
-            <a href="logout.php">Logout</a>
+            <a href="index.php">Back to App</a> | <a href="logout.php">Logout</a>
         </div>
     </div>
 </body>
