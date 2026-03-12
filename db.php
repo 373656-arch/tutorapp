@@ -1,5 +1,5 @@
 <?php
-$host    = getenv('DB_HOST') ?: 'auth-db941.hstgr.io';
+$host    = preg_replace('#^https?://|/$#', '', getenv('DB_HOST') ?: 'auth-db941.hstgr.io');
 $db      = getenv('DB_NAME') ?: 'u237055794_team04';
 $user    = getenv('DB_USER') ?: 'u237055794_team04';
 $pass    = getenv('DB_PASS') ?: '';
