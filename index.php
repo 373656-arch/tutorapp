@@ -116,6 +116,10 @@ try {
         <div style="text-align: center; margin-top: 1rem;">
             <span id="cardCounter">1/1</span>
         </div>
+        <div style="display: flex; justify-content: center; gap: 1rem; margin-top: 1.5rem;">
+            <button id="flashcardContinueBtn">Continue Chat</button>
+            <button id="flashcardRetryBtn">Start Over</button>
+        </div>
     </div>
 
     <div class="quiz-container" id="quizContainer">
@@ -142,7 +146,10 @@ try {
                 <div class="score-value" id="finalScore">0%</div>
                 <div class="score-text" id="scoreMessage">Great job!</div>
             </div>
-            <button id="quizRestartBtn">Start Over</button>
+            <div style="display: flex; justify-content: center; gap: 1rem; margin-top: 1.5rem;">
+                <button id="quizContinueBtn">Continue Chat</button>
+                <button id="quizRestartBtn">Start Over</button>
+            </div>
         </div>
     </div>
 
@@ -196,6 +203,11 @@ try {
         const finalScore = document.getElementById('finalScore');
         const scoreMessage = document.getElementById('scoreMessage');
         const quizRestartBtn = document.getElementById('quizRestartBtn');
+        const quizContinueBtn = document.getElementById('quizContinueBtn');
+        
+        // Flashcard action buttons
+        const flashcardContinueBtn = document.getElementById('flashcardContinueBtn');
+        const flashcardRetryBtn = document.getElementById('flashcardRetryBtn');
 
         function appendMessage(role, text) {
             const div = document.createElement('div');
@@ -393,6 +405,27 @@ try {
             quizScore = 0;
             quizAnswers = [];
             displayQuizQuestion();
+        });
+
+        quizContinueBtn.addEventListener('click', () => {
+            quizComplete.classList.remove('active');
+            modeSelect.value = 'general';
+            currentMode = 'general';
+            showChatMode();
+            appendMessage('bot', 'Welcome back! What else can I help you with?');
+        });
+
+        flashcardContinueBtn.addEventListener('click', () => {
+            modeSelect.value = 'general';
+            currentMode = 'general';
+            showChatMode();
+            appendMessage('bot', 'Welcome back! What else can I help you with?');
+        });
+
+        flashcardRetryBtn.addEventListener('click', () => {
+            currentCardIndex = 0;
+            flashcard.classList.remove('flipped');
+            updateFlashcard();
         });
 
         async function parseQuizResponse(content) {
