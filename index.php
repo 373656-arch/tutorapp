@@ -33,7 +33,8 @@ try {
         :root { --primary: #007bff; --dark: #1a1a1a; --light: #f4f4f4; }
         body { font-family: 'Inter', -apple-system, sans-serif; background: var(--light); margin: 0; display: flex; flex-direction: column; height: 100vh; }
         header { background: var(--dark); color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .chat-container { flex: 1; overflow-y: auto; padding: 2rem; max-width: 900px; margin: 0 auto; width: 100%; box-sizing: border-box; }
+        .chat-container { flex: 1; overflow-y: auto; padding: 2rem; max-width: 900px; margin: 0 auto; width: 100%; box-sizing: border-box; display: flex; flex-direction: column; }
+        .chat-container.hidden { display: none; }
         .message { margin-bottom: 1.5rem; padding: 1rem; border-radius: 8px; max-width: 85%; line-height: 1.6; }
         .user-message { background: var(--primary); color: white; margin-left: auto; }
         .bot-message { background: white; border: 1px solid #ddd; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
@@ -46,15 +47,15 @@ try {
         .logout-btn { background: #dc3545; font-size: 0.9rem; padding: 0.5rem 1rem; text-decoration: none; color: white; border-radius: 4px; }
         
         /* Flashcard Styles */
-        .flashcard-container { display: none; flex: 1; overflow-y: auto; padding: 2rem; max-width: 900px; margin: 0 auto; width: 100%; box-sizing: border-box; }
-        .flashcard { perspective: 1000px; width: 100%; height: 300px; position: relative; }
+        .flashcard-container { flex: 1; overflow-y: auto; padding: 2rem; max-width: 900px; margin: 0 auto; width: 100%; box-sizing: border-box; display: none; flex-direction: column; align-items: center; justify-content: center; }
+        .flashcard-container.active { display: flex; }
+        .flashcard { perspective: 1000px; width: 100%; max-width: 600px; height: 300px; position: relative; }
         .flashcard-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.6s; transform-style: preserve-3d; box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2); }
         .flashcard.flipped .flashcard-inner { transform: rotateY(180deg); }
-        .flashcard-front, .flashcard-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; display: flex; align-items: center; justify-content: center; border-radius: 8px; padding: 1rem; box-sizing: border-box; }
+        .flashcard-front, .flashcard-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; display: flex; align-items: center; justify-content: center; border-radius: 8px; padding: 1rem; box-sizing: border-box; font-size: 1.1rem; }
         .flashcard-front { background: white; border: 1px solid #ddd; color: black; }
         .flashcard-back { background: var(--primary); color: white; transform: rotateY(180deg); }
-        .flashcard-buttons { display: flex; justify-content: center; gap: 1rem; margin-top: 1rem; }
-        .flashcard-nav { display: flex; justify-content: center; gap: 1rem; margin-top: 1rem; }
+        .flashcard-nav { display: flex; justify-content: center; gap: 1rem; margin-top: 1rem; width: 100%; }
     </style>
 </head>
 <body>
@@ -131,24 +132,54 @@ try {
         }
 
         function showFlashcardMode() {
-            chat.style.display = 'none';
-            flashcardContainer.style.display = 'flex';
+            chat.classList.add('hidden');
+            flashcardContainer.classList.add('active');
         }
 
         function showChatMode() {
-            chat.style.display = 'flex';
-            flashcardContainer.style.display = 'none';
+            chat.classList.remove('hidden');
+            flashcardContainer.classList.remove('active');
         }
 
         async function fetchFlashcards(topic) {
-            // Simulate API call to generate flashcards based on topic
-            flashcards = [
-                { front: 'What was the main cause of the American Revolution?', back: 'Taxation without representation' },
-                { front: 'Who was the primary author of the Declaration of Independence?', back: 'Thomas Jefferson' },
-                { front: 'What document established the first government of the United States?', back: 'Articles of Confederation' }
-            ];
-            currentCardIndex = 0;
-            updateFlashcard();
+            try {
+                const response = await fetch('api.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: `Create 5 flashcards about ${topic}`, mode: 'flashcards' })
+                });
+                
+                const data = await response.json();
+                let content = data.choices && data.choices[0].message ? data.choices[0].message.content : '[]';
+                
+                // Try to parse JSON from the response
+                try {
+                    let jsonMatch = content.match(/\[[\s\S]*\]/);
+                    if (jsonMatch) {
+                        flashcards = JSON.parse(jsonMatch[0]);
+                    } else {
+                        // Fallback: parse the response manually
+                        flashcards = [];
+                    }
+                } catch (e) {
+                    appendMessage('bot', 'Error parsing flashcards. Please try a different topic.');
+                    showChatMode();
+                    return;
+                }
+                
+                if (flashcards.length === 0) {
+                    appendMessage('bot', 'Could not generate flashcards. Please try a different topic.');
+                    showChatMode();
+                    return;
+                }
+                
+                currentCardIndex = 0;
+                updateFlashcard();
+            } catch (e) {
+                console.error('Flashcard fetch error:', e);
+                appendMessage('bot', 'Error generating flashcards.');
+                showChatMode();
+            }
         }
 
         function updateFlashcard() {
@@ -181,6 +212,7 @@ try {
         modeSelect.addEventListener('change', () => {
             currentMode = modeSelect.value;
             if (currentMode === 'flashcards') {
+                showChatMode();
                 appendMessage('bot', 'Please enter the topic or subject you want flashcards for.');
             } else {
                 showChatMode();
@@ -201,10 +233,8 @@ try {
             try {
                 console.log("Sending:", { message, mode });
                 if (mode === 'flashcards') {
-                    // Simulate fetching flashcards based on user input
                     appendMessage('bot', `Generating flashcards for: ${message}`);
-                    await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call delay
-                    fetchFlashcards(message);
+                    await fetchFlashcards(message);
                     showFlashcardMode();
                 } else {
                     const response = await fetch('api.php', {
