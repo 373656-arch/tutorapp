@@ -164,16 +164,28 @@ try {
         </select>
         <select id="subject">
             <option value="">Subject</option>
-            <option value="math">Math</option>
-            <option value="science">Science</option>
-            <option value="english">English</option>
-            <option value="history">History</option>
+            <option value="algebra1">Algebra I</option>
+            <option value="algebra2">Algebra II</option>
+            <option value="geometry">Geometry</option>
+            <option value="precalc">Precalculus</option>
+            <option value="calculus">Calculus</option>
+            <option value="statistics">Statistics</option>
             <option value="biology">Biology</option>
             <option value="chemistry">Chemistry</option>
             <option value="physics">Physics</option>
+            <option value="env_science">Environmental Science</option>
+            <option value="world_history">World History</option>
+            <option value="american_history">American History</option>
+            <option value="european_history">European History</option>
+            <option value="english_comp">English Composition</option>
+            <option value="literature">Literature</option>
             <option value="spanish">Spanish</option>
             <option value="french">French</option>
+            <option value="mandarin">Mandarin Chinese</option>
+            <option value="latin">Latin</option>
             <option value="economics">Economics</option>
+            <option value="psychology">Psychology</option>
+            <option value="computer_science">Computer Science</option>
         </select>
         <select id="level">
             <option value="">Level</option>
