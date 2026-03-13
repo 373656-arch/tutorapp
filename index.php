@@ -32,7 +32,8 @@ try {
     <style>
         :root { --primary: #007bff; --dark: #1a1a1a; --light: #f4f4f4; }
         body { font-family: 'Inter', -apple-system, sans-serif; background: var(--light); margin: 0; display: flex; flex-direction: column; height: 100vh; }
-        header { background: var(--dark); color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        header { background: var(--dark); color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        header .header-user { display: flex; align-items: center; gap: 0.8rem; flex-wrap: wrap; }
         .chat-container { flex: 1; overflow-y: auto; padding: 2rem; max-width: 900px; margin: 0 auto; width: 100%; box-sizing: border-box; display: flex; flex-direction: column; }
         .chat-container.hidden { display: none; }
         .message { margin-bottom: 1.5rem; padding: 1rem; border-radius: 8px; max-width: 85%; line-height: 1.6; }
@@ -89,9 +90,9 @@ try {
 <body>
     <header>
         <div style="font-size: 1.5rem; font-weight: bold;">hightutor.ai</div>
-        <div style="display: flex; align-items: center; gap: 1rem;">
-            <span>Hi, <?= htmlspecialchars($user['username'] ?? 'Guest') ?></span>
-            <a href="profile.php" style="padding: 0.5rem 1rem; border-radius: 4px; background: #6c757d; color: white; text-decoration: none; font-size: 0.9rem;">Profile</a>
+        <div class="header-user">
+            <span style="white-space: nowrap;">Hi, <?= htmlspecialchars($user['username'] ?? 'Guest') ?></span>
+            <a href="profile.php" style="padding: 0.5rem 1rem; border-radius: 4px; background: #6c757d; color: white; text-decoration: none; font-size: 0.9rem; white-space: nowrap;">Profile</a>
             <a href="logout.php" class="logout-btn">Logout</a>
         </div>
     </header>
@@ -491,14 +492,33 @@ try {
 
         async function sendMessage() {
             console.log("Send button clicked");
-            const message = userInput.value.trim();
+            let message = userInput.value.trim();
             const mode = modeSelect.value;
-            if (!message) return;
+            const subjectSelect = document.getElementById('subject');
+            const levelSelect = document.getElementById('level');
+            
+            // For flashcards and quiz, if no message, try to use subject/level
+            if (!message && (mode === 'flashcards' || mode === 'quiz')) {
+                const subject = subjectSelect.value;
+                const level = levelSelect.value;
+                
+                if (subject) {
+                    message = level ? `${level} ${subject}` : subject;
+                } else {
+                    appendMessage('bot', `Please select a subject or type a topic for ${mode === 'flashcards' ? 'flashcards' : 'the quiz'}.`);
+                    return;
+                }
+            }
+            
+            // Regular modes require text input
+            if (!message && mode !== 'flashcards' && mode !== 'quiz') return;
 
             userInput.value = '';
             userInput.disabled = true;
             sendBtn.disabled = true;
-            appendMessage('user', message);
+            if (userInput.value.trim() || (mode !== 'flashcards' && mode !== 'quiz')) {
+                appendMessage('user', userInput.value.trim() || message);
+            }
 
             try {
                 console.log("Sending:", { message, mode });
