@@ -39,7 +39,7 @@ try {
         .message { margin-bottom: 1.5rem; padding: 1rem; border-radius: 8px; max-width: 85%; line-height: 1.6; }
         .user-message { background: var(--primary); color: white; margin-left: auto; }
         .bot-message { background: white; border: 1px solid #ddd; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        .controls { background: white; padding: 1.5rem 2rem; border-top: 1px solid #ddd; display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; max-width: 900px; margin: 0 auto; width: 100%; box-sizing: border-box; }
+        .controls { background: white; padding: 1.5rem 2rem; border-top: 1px solid #ddd; display: flex; flex-wrap: nowrap; gap: 1rem; align-items: center; max-width: 900px; margin: 0 auto; width: 100%; box-sizing: border-box; }
         select, input, button { padding: 0.8rem; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; }
         select { min-width: 140px; }
         input { flex: 1; min-width: 200px; }
