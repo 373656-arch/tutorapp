@@ -38,9 +38,10 @@ try {
         .message { margin-bottom: 1.5rem; padding: 1rem; border-radius: 8px; max-width: 85%; line-height: 1.6; }
         .user-message { background: var(--primary); color: white; margin-left: auto; }
         .bot-message { background: white; border: 1px solid #ddd; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        .controls { background: white; padding: 1.5rem 2rem; border-top: 1px solid #ddd; display: flex; gap: 1rem; align-items: center; max-width: 900px; margin: 0 auto; width: 100%; box-sizing: border-box; }
+        .controls { background: white; padding: 1.5rem 2rem; border-top: 1px solid #ddd; display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; max-width: 900px; margin: 0 auto; width: 100%; box-sizing: border-box; }
         select, input, button { padding: 0.8rem; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; }
-        input { flex: 1; }
+        select { min-width: 140px; }
+        input { flex: 1; min-width: 200px; }
         button { background: var(--primary); color: white; border: none; cursor: pointer; font-weight: bold; transition: opacity 0.2s; }
         button:hover { opacity: 0.9; }
         button:disabled { background: #ccc; }
@@ -160,6 +161,27 @@ try {
             <option value="turbo">Turbo (Bullets)</option>
             <option value="quiz">Quiz Practice</option>
             <option value="vocab">Vocab</option>
+        </select>
+        <select id="subject">
+            <option value="">Subject</option>
+            <option value="math">Math</option>
+            <option value="science">Science</option>
+            <option value="english">English</option>
+            <option value="history">History</option>
+            <option value="biology">Biology</option>
+            <option value="chemistry">Chemistry</option>
+            <option value="physics">Physics</option>
+            <option value="spanish">Spanish</option>
+            <option value="french">French</option>
+            <option value="economics">Economics</option>
+        </select>
+        <select id="level">
+            <option value="">Level</option>
+            <option value="honors">Honors</option>
+            <option value="ap">AP</option>
+            <option value="ib">IB</option>
+            <option value="ccap">CCAP</option>
+            <option value="regular">Regular</option>
         </select>
         <input type="text" id="userInput" placeholder="Ask a question or share a problem..." autocomplete="off">
         <button id="sendBtn">Send</button>
