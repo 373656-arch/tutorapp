@@ -2,7 +2,7 @@
 $host    = preg_replace('#^https?://|/$#', '', getenv('DB_HOST') ?: 'auth-db941.hstgr.io');
 $db      = getenv('DB_NAME') ?: 'u237055794_team04';
 $user    = getenv('DB_USER') ?: 'u237055794_team04';
-$pass    = getenv('DB_PASS') ?: '';
+$pass    = getenv('DB_PASS') ?: 'K83wn|/=6?|u';
 $charset = 'utf8mb4';
 
 $dsn = "mysql:host=$host;dbname=$db;charset=$charset";
