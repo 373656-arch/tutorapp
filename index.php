@@ -85,6 +85,8 @@ try {
         .score-value { font-size: 3rem; font-weight: bold; color: var(--primary); }
         .score-text { font-size: 1.2rem; margin-top: 0.5rem; color: #666; }
         .hidden { display: none !important; }
+        .token-usage { font-size: 0.72rem; color: #999; margin-top: 0.6rem; text-align: right; border-top: 1px solid #eee; padding-top: 0.4rem; }
+        .bot-message .token-usage { color: #aaa; border-top-color: #e0e0e0; }
     </style>
 </head>
 <body>
@@ -244,10 +246,16 @@ try {
         const flashcardContinueBtn = document.getElementById('flashcardContinueBtn');
         const flashcardRetryBtn = document.getElementById('flashcardRetryBtn');
 
-        function appendMessage(role, text) {
+        function appendMessage(role, text, usage) {
             const div = document.createElement('div');
             div.className = `message ${role}-message`;
             div.innerHTML = role === 'bot' ? marked.parse(text) : text;
+            if (usage && role === 'bot') {
+                const tokenDiv = document.createElement('div');
+                tokenDiv.className = 'token-usage';
+                tokenDiv.textContent = `Tokens: ${usage.prompt_tokens} prompt + ${usage.completion_tokens} completion = ${usage.total_tokens} total`;
+                div.appendChild(tokenDiv);
+            }
             chat.appendChild(div);
             chat.scrollTop = chat.scrollHeight;
         }
@@ -300,6 +308,16 @@ try {
                     appendMessage('bot', 'Could not generate flashcards. Please try a different topic.');
                     showChatMode();
                     return;
+                }
+                
+                if (data.usage) {
+                    const lastMsg = chat.querySelector('.message.bot-message:last-child');
+                    if (lastMsg) {
+                        const tokenDiv = document.createElement('div');
+                        tokenDiv.className = 'token-usage';
+                        tokenDiv.textContent = `Tokens: ${data.usage.prompt_tokens} prompt + ${data.usage.completion_tokens} completion = ${data.usage.total_tokens} total`;
+                        lastMsg.appendChild(tokenDiv);
+                    }
                 }
                 
                 currentCardIndex = 0;
@@ -537,7 +555,18 @@ try {
                     const data = await response.json();
                     if (data.choices && data.choices[0].message) {
                         const success = await parseQuizResponse(data.choices[0].message.content);
-                        if (success) showQuizMode();
+                        if (success) {
+                            if (data.usage) {
+                                const lastMsg = chat.querySelector('.message.bot-message:last-child');
+                                if (lastMsg) {
+                                    const tokenDiv = document.createElement('div');
+                                    tokenDiv.className = 'token-usage';
+                                    tokenDiv.textContent = `Tokens: ${data.usage.prompt_tokens} prompt + ${data.usage.completion_tokens} completion = ${data.usage.total_tokens} total`;
+                                    lastMsg.appendChild(tokenDiv);
+                                }
+                            }
+                            showQuizMode();
+                        }
                     } else {
                         appendMessage('bot', 'Error: ' + (data.error || 'Unknown error'));
                     }
@@ -551,7 +580,7 @@ try {
                     const data = await response.json();
                     console.log("API Response:", data);
                     if (data.choices && data.choices[0].message) {
-                        appendMessage('bot', data.choices[0].message.content);
+                        appendMessage('bot', data.choices[0].message.content, data.usage);
                     } else {
                         appendMessage('bot', 'Error: ' + (data.error || 'Unknown error'));
                     }
