@@ -1,3 +1,25 @@
+<?php
+session_start();
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit;
+}
+
+require_once 'db.php';
+
+$user = null;
+try {
+    $stmt = $pdo->prepare("SELECT * FROM users WHERE id = ?");
+    $stmt->execute([$_SESSION['user_id']]);
+    $user = $stmt->fetch();
+    if (!$user) {
+        throw new Exception("User not found");
+    }
+} catch (Exception $e) {
+    error_log("Error fetching user: " . $e->getMessage());
+    $user = ['username' => 'Guest'];
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -11,27 +33,6 @@
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
 </head>
 <body>
-    <?php
-    session_start();
-    if (!isset($_SESSION['user_id'])) {
-        header("Location: login.php");
-        exit;
-    }
-    require_once 'db.php';
-    
-    $user = null;
-    try {
-        $stmt = $pdo->prepare("SELECT * FROM users WHERE id = ?");
-        $stmt->execute([$_SESSION['user_id']]);
-        $user = $stmt->fetch();
-        if (!$user) {
-            throw new Exception("User not found");
-        }
-    } catch (Exception $e) {
-        error_log("Error fetching user: " . $e->getMessage());
-        $user = ['username' => 'Guest'];
-    }
-    ?>
     <header class="header glass">
         <div style="font-size: 1.5rem; font-weight: bold; color: white;">hightutor.ai</div>
         <div class="header-user" style="display: flex; align-items: center; gap: 0.8rem;">
