@@ -52,133 +52,134 @@ $current_username = $user['username'] ?? '';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profile</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background-color: #f5f5f5;
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0a0e2a, #1a1f3a);
+            color: white;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             padding: 20px;
+            margin: 0;
         }
         
         .profile-container {
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            padding: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            padding: 2rem;
             max-width: 400px;
             width: 100%;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
         
         h1 {
-            font-size: 28px;
-            margin-bottom: 30px;
-            color: #333;
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: white;
             text-align: center;
         }
         
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 1.5rem;
         }
         
         label {
             display: block;
-            margin-bottom: 8px;
-            color: #555;
+            margin-bottom: 0.5rem;
+            color: rgba(255, 255, 255, 0.9);
             font-weight: 500;
-            font-size: 14px;
         }
         
         input[type="text"] {
             width: 100%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 16px;
-            transition: border-color 0.3s;
+            padding: 0.8rem;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1rem;
         }
         
         input[type="text"]:focus {
             outline: none;
-            border-color: #007bff;
-            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+            border-color: rgba(100, 150, 255, 0.7);
+            box-shadow: 0 0 0 2px rgba(100, 150, 255, 0.3);
         }
         
         button {
             width: 100%;
-            padding: 12px;
-            background-color: #007bff;
+            padding: 0.8rem;
+            background: rgba(100, 150, 255, 0.7);
             color: white;
             border: none;
-            border-radius: 4px;
-            font-size: 16px;
+            border-radius: 6px;
+            font-size: 1rem;
             font-weight: 500;
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: all 0.3s;
         }
         
         button:hover {
-            background-color: #0056b3;
-        }
-        
-        button:active {
-            background-color: #004085;
+            background: rgba(100, 150, 255, 0.9);
+            transform: translateY(-2px);
         }
         
         .message {
-            padding: 12px;
-            border-radius: 4px;
-            margin-bottom: 20px;
-            font-size: 14px;
+            padding: 0.8rem;
+            border-radius: 6px;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            font-size: 0.9rem;
         }
         
         .success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
+            background: rgba(40, 167, 69, 0.3);
+            color: #28a745;
+            border: 1px solid rgba(40, 167, 69, 0.5);
         }
         
         .error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
+            background: rgba(220, 53, 69, 0.3);
+            color: #dc3545;
+            border: 1px solid rgba(220, 53, 69, 0.5);
+        }
+        
+        .current-info {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.8rem;
+            border-radius: 6px;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.8);
         }
         
         .logout-link {
             text-align: center;
-            margin-top: 20px;
+            margin-top: 1.5rem;
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
         }
         
         .logout-link a {
-            color: #007bff;
+            color: rgba(100, 150, 255, 1);
             text-decoration: none;
-            font-size: 14px;
+            font-size: 0.9rem;
         }
         
         .logout-link a:hover {
             text-decoration: underline;
         }
-        
-        .current-info {
-            background-color: #f9f9f9;
-            padding: 12px;
-            border-radius: 4px;
-            margin-bottom: 20px;
-            font-size: 14px;
-            color: #666;
-        }
     </style>
 </head>
 <body>
-    <div class="profile-container">
+    <div class="profile-container glass">
         <h1>My Profile</h1>
         
         <?php if ($message): ?>
@@ -196,19 +197,14 @@ $current_username = $user['username'] ?? '';
         <form method="POST">
             <div class="form-group">
                 <label for="new_username">New Username</label>
-                <input 
-                    type="text" 
-                    id="new_username" 
-                    name="new_username" 
-                    placeholder="Enter new username"
-                    required
-                >
+                <input type="text" id="new_username" name="new_username" placeholder="Enter new username" required>
             </div>
             <button type="submit">Update Username</button>
         </form>
         
         <div class="logout-link">
-            <a href="index.php">Back to App</a> | <a href="logout.php">Logout</a>
+            <a href="index.php">Back to App</a> |
+            <a href="logout.php">Logout</a>
         </div>
     </div>
 </body>
