@@ -10,15 +10,17 @@ require_once 'SystemPrompt.php';
 
 header('Content-Type: application/json');
 
-$apiKey = $_ENV['GROQLLM_API_KEY'];
+$apiKey = getenv('GROQLLM_API_KEY');
 if (!$apiKey) {
     echo json_encode(['error' => 'API Key missing in Replit Secrets']);
     exit;
 }
 
-$input = json_decode(file_get_contents('php://input'), true);
-$userMessage = $input['message'] ?? '';
-$mode = $input['mode'] ?? 'general';
+$input       = json_decode(file_get_contents('php://input'), true);
+$userMessage = trim($input['message'] ?? '');
+$mode        = $input['mode']    ?? 'general';
+$subject     = $input['subject'] ?? '';
+$level       = $input['level']   ?? '';
 
 if (empty($userMessage)) {
     echo json_encode(['error' => 'Message is empty']);
@@ -27,25 +29,35 @@ if (empty($userMessage)) {
 
 $systemContent = SystemPrompt::getPrompt($mode);
 
-$url = "https://api.groq.com/openai/v1/chat/completions";
+if ($subject || $level) {
+    $context = "\n\nContext for this session:";
+    if ($subject) $context .= " Subject: $subject.";
+    if ($level)   $context .= " Level: $level.";
+    $context .= " Tailor your responses accordingly.";
+    $systemContent .= $context;
+}
+
+$url  = "https://api.groq.com/openai/v1/chat/completions";
 $data = [
-    "model" => "llama-3.1-8b-instant",
-    "messages" => [
+    "model"       => "llama-3.1-8b-instant",
+    "messages"    => [
         ["role" => "system", "content" => $systemContent],
-        ["role" => "user", "content" => $userMessage]
+        ["role" => "user",   "content" => $userMessage]
     ],
-    "temperature" => 0.7
+    "temperature" => 0.7,
+    "max_tokens"  => 1024
 ];
 
 $ch = curl_init($url);
 curl_setopt_array($ch, [
     CURLOPT_RETURNTRANSFER => true,
-    CURLOPT_POST => true,
-    CURLOPT_HTTPHEADER => [
+    CURLOPT_POST           => true,
+    CURLOPT_HTTPHEADER     => [
         "Content-Type: application/json",
         "Authorization: Bearer $apiKey"
     ],
-    CURLOPT_POSTFIELDS => json_encode($data)
+    CURLOPT_POSTFIELDS => json_encode($data),
+    CURLOPT_TIMEOUT    => 30
 ]);
 
 $response = curl_exec($ch);

@@ -12,9 +12,7 @@ try {
     $stmt = $pdo->prepare("SELECT * FROM users WHERE id = ?");
     $stmt->execute([$_SESSION['user_id']]);
     $user = $stmt->fetch();
-    if (!$user) {
-        throw new Exception("User not found");
-    }
+    if (!$user) throw new Exception("User not found");
 } catch (Exception $e) {
     error_log("Error fetching user: " . $e->getMessage());
     $user = ['username' => 'Guest'];
@@ -26,45 +24,66 @@ try {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>hightutor.ai - Elite AI Tutoring</title>
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
 </head>
 <body>
-    <header class="header glass">
-        <div style="font-size: 1.5rem; font-weight: bold; color: white;">hightutor.ai</div>
-        <div class="header-user" style="display: flex; align-items: center; gap: 0.8rem;">
-            <span style="white-space: nowrap; color: white;">Hi, <?= htmlspecialchars($user['username'] ?? 'Guest') ?></span>
-            <a href="profile.php" style="padding: 0.5rem 1rem; border-radius: 4px; background: rgba(255, 255, 255, 0.2); color: white; text-decoration: none; font-size: 0.9rem; white-space: nowrap; backdrop-filter: blur(5px); border: 1px solid rgba(255, 255, 255, 0.3);">Profile</a>
-            <a href="logout.php" class="logout-btn glass" style="background: rgba(220, 53, 69, 0.7);">Logout</a>
+
+<header class="header">
+    <div class="header-logo">hightutor.ai</div>
+    <div class="header-user">
+        <span>Hi, <?= htmlspecialchars($user['username'] ?? 'Guest') ?></span>
+        <a href="profile.php" class="btn-glass">Profile</a>
+        <a href="logout.php" class="btn-glass btn-danger">Logout</a>
+    </div>
+</header>
+
+<div class="app-layout">
+    <div class="chat-scroll" id="chatScroll">
+        <div class="chat-inner" id="chat">
+            <div class="message bot-message">
+                Hello! I&rsquo;m your hightutor.ai assistant. Select a mode and subject, then ask me anything!
+            </div>
         </div>
-    </header>
+    </div>
 
-    <div class="chat-container glass" id="chat" style="margin-top: 80px; padding: 2rem; max-width: 900px; margin-left: auto; margin-right: auto; width: 90%;">
-        <div class="message bot-message glass" style="margin-bottom: 1.5rem; padding: 1rem; border-radius: 8px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.3);">
-            Hello! I am your elite tutor. Select a mode and tell me what you're working on today.
+    <!-- Flashcard view (hidden by default) -->
+    <div class="chat-scroll" id="flashcardView" style="display:none;">
+        <div class="chat-inner">
+            <div class="flashcard-wrap">
+                <div class="flashcard" id="flashcard" onclick="flipCard()">
+                    <div class="flashcard-inner">
+                        <div class="flashcard-front" id="fcFront">Click to generate flashcards first.</div>
+                        <div class="flashcard-back" id="fcBack"></div>
+                    </div>
+                </div>
+                <div class="flashcard-counter" id="fcCounter"></div>
+                <div class="flashcard-controls">
+                    <button class="btn-glass" onclick="prevCard()">&#8592; Prev</button>
+                    <button class="btn-glass" onclick="flipCard()">Flip</button>
+                    <button class="btn-glass" onclick="nextCard()">Next &#8594;</button>
+                </div>
+                <div style="text-align:center; margin-top:1rem;">
+                    <button class="btn-glass" onclick="exitFlashcards()">Back to Chat</button>
+                </div>
+            </div>
         </div>
     </div>
+</div>
 
-    <!-- Flashcard and Quiz containers remain unchanged for now -->
-    <div class="flashcard-container" id="flashcardContainer">
-        <!-- Flashcard content -->
-    </div>
-    <div class="quiz-container" id="quizContainer">
-        <!-- Quiz content -->
-    </div>
-
-    <div class="controls glass" style="position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border-top: 1px solid rgba(255, 255, 255, 0.3); padding: 1.5rem; max-width: 900px; margin: 0 auto; width: 90%; box-sizing: border-box;">
-        <select id="mode" class="glass" style="padding: 0.8rem; border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 6px; background: rgba(255, 255, 255, 0.1); color: white;">
+<div class="controls-bar">
+    <div class="controls-inner">
+        <select id="mode">
             <option value="general">General (Socratic)</option>
             <option value="flashcards">Flashcards</option>
             <option value="turbo">Turbo (Bullets)</option>
             <option value="quiz">Quiz Practice</option>
             <option value="vocab">Vocab</option>
         </select>
-        <select id="subject" class="glass" style="padding: 0.8rem; border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 6px; background: rgba(255, 255, 255, 0.1); color: white;">
+        <select id="subject">
             <option value="">Subject</option>
             <option value="algebra1">Algebra I</option>
             <option value="algebra2">Algebra II</option>
@@ -89,7 +108,7 @@ try {
             <option value="psychology">Psychology</option>
             <option value="computer_science">Computer Science</option>
         </select>
-        <select id="level" class="glass" style="padding: 0.8rem; border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 6px; background: rgba(255, 255, 255, 0.1); color: white;">
+        <select id="level">
             <option value="">Level</option>
             <option value="honors">Honors</option>
             <option value="ap">AP</option>
@@ -97,13 +116,160 @@ try {
             <option value="ccap">CCAP</option>
             <option value="regular">Regular</option>
         </select>
-        <input type="text" id="userInput" class="glass" placeholder="Ask a question or share a problem..." autocomplete="off" style="flex: 1; padding: 0.8rem; border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 6px; background: rgba(255, 255, 255, 0.1); color: white;">
-        <button id="sendBtn" class="glass" style="padding: 0.8rem; background: rgba(100, 150, 255, 0.7); border: none; color: white; border-radius: 6px; cursor: pointer; font-weight: bold;">Send</button>
+        <input type="text" id="userInput" placeholder="Ask a question or share a problem..." autocomplete="off">
+        <button class="btn-send" id="sendBtn">Send</button>
     </div>
+</div>
 
-    <!-- Rest of your JavaScript and logic remains the same -->
-    <script>
-        // Your existing JavaScript here
-    </script>
+<script>
+const chat       = document.getElementById('chat');
+const chatScroll = document.getElementById('chatScroll');
+const userInput  = document.getElementById('userInput');
+const sendBtn    = document.getElementById('sendBtn');
+const modeSelect = document.getElementById('mode');
+
+// Flashcard state
+let flashcards = [];
+let fcIndex = 0;
+
+function scrollToBottom() {
+    chatScroll.scrollTop = chatScroll.scrollHeight;
+}
+
+function appendMessage(role, content) {
+    const div = document.createElement('div');
+    div.className = `message ${role === 'user' ? 'user-message' : 'bot-message'}`;
+    if (role === 'bot' && typeof marked !== 'undefined') {
+        div.innerHTML = marked.parse(content);
+    } else {
+        div.textContent = content;
+    }
+    chat.appendChild(div);
+    scrollToBottom();
+    return div;
+}
+
+function showTyping() {
+    const div = document.createElement('div');
+    div.className = 'message bot-message typing';
+    div.id = 'typingIndicator';
+    div.innerHTML = '<span></span><span></span><span></span>';
+    chat.appendChild(div);
+    scrollToBottom();
+}
+
+function removeTyping() {
+    const t = document.getElementById('typingIndicator');
+    if (t) t.remove();
+}
+
+async function sendMessage() {
+    const message = userInput.value.trim();
+    if (!message) return;
+
+    const mode    = modeSelect.value;
+    const subject = document.getElementById('subject').value;
+    const level   = document.getElementById('level').value;
+
+    appendMessage('user', message);
+    userInput.value = '';
+    userInput.disabled = true;
+    sendBtn.disabled = true;
+    showTyping();
+
+    try {
+        const payload = { message, mode };
+        if (subject) payload.subject = subject;
+        if (level)   payload.level   = level;
+
+        const res  = await fetch('api.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        removeTyping();
+
+        if (data.error) {
+            appendMessage('bot', 'Error: ' + data.error);
+            return;
+        }
+
+        const reply = data.choices?.[0]?.message?.content ?? 'No response received.';
+
+        if (mode === 'flashcards') {
+            handleFlashcards(reply);
+        } else {
+            appendMessage('bot', reply);
+        }
+    } catch (e) {
+        removeTyping();
+        appendMessage('bot', 'Connection error. Please try again.');
+        console.error(e);
+    } finally {
+        userInput.disabled = false;
+        sendBtn.disabled = false;
+        userInput.focus();
+    }
+}
+
+// Flashcard handling
+function handleFlashcards(reply) {
+    try {
+        const jsonMatch = reply.match(/\[[\s\S]*\]/);
+        if (!jsonMatch) throw new Error('No JSON array found');
+        flashcards = JSON.parse(jsonMatch[0]);
+        if (!flashcards.length) throw new Error('Empty array');
+        fcIndex = 0;
+        showFlashcardView();
+    } catch (e) {
+        appendMessage('bot', 'Could not parse flashcards. Here\'s the raw response:\n\n' + reply);
+    }
+}
+
+function showFlashcardView() {
+    document.getElementById('chatScroll').style.display = 'none';
+    document.getElementById('flashcardView').style.display = 'flex';
+    renderCard();
+}
+
+function exitFlashcards() {
+    document.getElementById('flashcardView').style.display = 'none';
+    document.getElementById('chatScroll').style.display = 'flex';
+    appendMessage('bot', `Done reviewing ${flashcards.length} flashcard(s)! Ask me anything else.`);
+}
+
+function renderCard() {
+    if (!flashcards.length) return;
+    const card = flashcards[fcIndex];
+    document.getElementById('fcFront').textContent = card.front ?? card.question ?? 'No front';
+    document.getElementById('fcBack').textContent  = card.back  ?? card.answer  ?? 'No back';
+    document.getElementById('fcCounter').textContent = `Card ${fcIndex + 1} of ${flashcards.length}`;
+    document.getElementById('flashcard').classList.remove('flipped');
+}
+
+function flipCard() {
+    document.getElementById('flashcard').classList.toggle('flipped');
+}
+
+function nextCard() {
+    if (fcIndex < flashcards.length - 1) {
+        fcIndex++;
+        renderCard();
+    }
+}
+
+function prevCard() {
+    if (fcIndex > 0) {
+        fcIndex--;
+        renderCard();
+    }
+}
+
+// Event listeners
+sendBtn.addEventListener('click', sendMessage);
+userInput.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
+</script>
+
 </body>
 </html>
